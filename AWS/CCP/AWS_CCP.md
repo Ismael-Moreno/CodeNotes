@@ -83,7 +83,7 @@ AWS GovCloud Regions alllow customers to host sensitive Controlled Unclasssified
 
 # EC2 Pricing Models
 
-![Pricing schema](.\pricing.png)
+![Pricing schema](./pricing.png)
 
 ## On-Demand
 
