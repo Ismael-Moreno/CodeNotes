@@ -48,4 +48,23 @@ At AWS, we prefer to distribute capabilities into teams rather than having a cen
 ### Design Principles
 
 - Perform operations as code: You can implement your operations procedures as code and automate their execution by triggering them in response to events
-- Annotate documentation:
+- Annotate documentation: In the cloud, you can automate the creation of annotated documentation after every build. Use annotations as an input to
+your operations code.
+- Make frequent, small, reversible changes: Design workloads to allow components to be updated regularly.
+- Refine operations procedures frequently: As you use operations procedures, look for opportunities to improve them. As you evolve your workload, evolve your AWS Well-Architected Framework procedures appropriately.
+- Anticipate failure: Test your failure scenarios and validate your understanding of their impact. Test your response procedures to ensure that they are effective, and that teams are familiar with their execution.
+- Learn from all operational failures: Drive improvement through lessons learned from all operational events and failures.
+
+### Best practices
+
+There are three best practice areas for operational excellence in the cloud:
+- Prepare: Create mechanisms to validate that workloads, or changes, are ready to be moved into production and supported by operations. Operational readiness is validated through checklists to ensure a workload meets defined standards and that required AWS Well-Architected Framework procedures are adequately captured in runbooks and playbooks. Prior to transition, test responses to operational events and failures. Practice responses in supported environments through failure injection and game day events.
+- Operate: Successful operation of a workload is measured by the achievement of business and customer outcomes. Define expected outcomes, determine how success will be measured, and identify the workload and operations metrics that will be used in those calculations to determine if operations are successful. Consider that operational health includes both the health of the workload and the health and success of the operations acting upon the workload. Establish baselines from which improvement or degradation of operations will be identified, collect and analyze your metrics, and then validate your understanding of operations success and how it changes over time. Use collected metrics to determine if you are satisfying customer and business needs, and identify areas for improvement. Determine the root cause of unplanned events and unexpected impacts from planned events.
+- Evolve: Dedicate work cycles to making continuous incremental improvements. Regularly evaluate and prioritize opportunities for improvement. Include feedback loops within your procedures to rapidly identify areas for improvement and capture learnings from the execution of operations. Share lessons learned across teams to share the benefits of those lessons. 
+
+### Key AWS Services
+
+The AWS service that is essential to Operational Excellence is AWS CloudFormation, which you can use to create templates based on best practices. The following services and features support the three areas in operational excellence:
+- Prepare: AWS Config and AWS Config rules can be used to create standards for workloads and to determine if environments are compliant with those standards before being put into production.
+- Operate: Amazon CloudWatch allows you to monitor the operational health of a workload.
+- Evolve: Amazon Elasticsearch Service (Amazon ES) allows you to analyze your log data to gain actionable insights quickly and securely.
