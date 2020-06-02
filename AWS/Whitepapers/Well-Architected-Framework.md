@@ -118,3 +118,14 @@ The following services and features support the five areas in security:
 ## Reliability
 
 ### Design Principles
+
+- Test recovery procedures: In the cloud, you can test how your system fails, and you can validate your recovery procedures. This exposes failure pathways that you can test and rectify before a real failure scenario, reducing the risk of components failing that have not been tested before.
+- Automatically recover from failure: By monitoring a system for key performance indicators (KPIs), you can trigger automation when a threshold is breached. This allows for automatic notification and tracking of failures, and for automated recovery processes that work around or repair the failure. It's possible to anticipate and remediate failures before they occur.
+- Scale horizontally to increase aggregate system availability: Replace one large resource with multiple small resources to reduce the impact of a single failure on the overall system. Distribute requests across multiple, smaller resources to ensure that they don't share a common point of failure.
+- Stop guessing capacity: you can monitor demand and system utilization, and automate the addition or removal of resources to maintain the optimal level to satisfy demand without overor under- provisioning.
+- Manage change in automation: Changes to your infrastructure should be done using automation. The changes that need to be managed are changes to the automation.
+
+### Best Practices
+
+- Foundations: Before architecting any system, foundational requirements that influence reliability should be in place. In an on-premises environment, these requirements can cause long lead times due to dependencies and therefore must be incorporated during initial planning. AWS sets service limits (an upper limit on the number of each resource your team can request) to protect you from accidentally over-provisioning resources. You will need to have governance and processes in place to monitor and change these limits to meet your business needs.
+-
