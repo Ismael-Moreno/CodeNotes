@@ -293,3 +293,13 @@ AWS Graviton2 processors support always-on 256-bit memory encryption to further 
 
 M6g instances deliver significant performance and price performance benefits for a broad spectrum of general-purpose workloads such as application servers, gaming servers, microservices, mid-size databases, and caching fleets. Arm developers can also build their applications directly on native Arm hardware as opposed to cross-compilation or emulation.
 
+## What are the various storage options available on M6g instances?
+
+M6g instances are EBS-optimized by default and offer up to 19,000 Mbps of dedicated EBS bandwidth to both encrypted and unencrypted EBS volumes. M6g instances only support Non-Volatile Memory Express (NVMe) interface to access EBS storage volumes. Additionally, options with local NVMe instance storage will also be available through the M6gd instance types.
+
+## Which network interface is supported on M6g instances?
+
+M6g instances support ENA based Enhanced Networking. With ENA, M6g instances can deliver up to 25 Gbps of network bandwidth between instances when launched within a Placement Group.
+
+## Will customers need to modify their applications and workloads to be able to run on the M6g instances?
+
