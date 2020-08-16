@@ -32,3 +32,12 @@ spec:
 
 Cuando el pod sobrepasa el limite de RAM se produce un OOMKilled (Out of Memory)  
 
+## QoS
+
+Kubernetes provides different levels of Quality of Service to pods depending on what they request and what limits are set for them. Pods that need to stay up and consistently good can request guaranteed resources, while pods with less exacting requirements can use resources with less/no guarantee.  
+
+Quality of Service (QoS) class is a Kubernetes concept which determines the scheduling and eviction priority of pods. QoS class is used by the Kubernetes scheduler to make decisions about scheduling pods onto nodes. There are three QoS classes in Kubernetes:
+- **Guaranteed**: For a pod to be placed in the Guaranteed QoS class, every container in the pod must have a CPU and memory limit and they must be the same. The Kubernetes scheduler assigns Guaranteed pods only to nodes which have enough resources to fulfil their CPU and memory requests. The Scheduler does this by ensuring that the sum of both memory and CPU requests for all containers (running and newly scheduled) is lower than the total capacity of the node.
+- **Burstable**: A pod is assigned a Burstable QoS class if at least one container in that pod has a memory or CPU request, the limit is over the request so it can be burst. The Kubernetes scheduler will not be able to ensure that Burstable pods are placed onto nodes that have enough resources for them. 
+- **BestEffort**: A pod is assigned a BestEffort QoS class if none of it’s containers have CPU or memory requests and limits. BestEffort pods are not guaranteed to be placed on to pods that have enough resources for them. They are, however, able to use any amount of free CPU and memory resources on the node. This can at times lead to resource contention with other pods, where BestEffort pods hog resources and do not leave enough resource headroom for other pods to consume resources within resource limits.
+

@@ -8,8 +8,10 @@ spec:
     image: polinux/stress
     resources:
      requests:
-      memory: "50Mi"
+      memory: "200Mi"
+      cpu: "0.5"
      limits:
-      memory: "53Mi"
+      memory: "100Mi"
+      cpu: "0.8"
     command: ["stress"]
-    args: ["--vm", "1", "--vm-bytes", "2500M", "--vm-hang", "1"]
+    args: ["--vm", "1", "--vm-bytes", "150M", "--vm-hang", "1"]
