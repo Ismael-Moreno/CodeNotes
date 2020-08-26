@@ -30,3 +30,185 @@ A PersistentVolumeClaim (PVC) is a request for storage by a user. It is similar 
 - Retain -- manual reclamation. The PV will be saved but not anymore claimed.
 - Recycle -- basic scrub (rm -rf /thevolume/*). The PV will not be deleted but the content inside it.
 - Delete -- associated storage asset such as AWS EBS, GCE PD, Azure Disk, or OpenStack Cinder volume is deleted. When erasing the PVC the PV will be deleted too.
+
+## Creating EmptyDir volume
+
+emptyDir.yaml
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+    - image: nginx:alpine
+      name: test-container
+      volumeMounts:
+        - mountPath: /var/log/nginx
+          name: vol
+  volumes:
+    - name: vol
+      emptyDir: {}
+```
+
+## Create PV
+
+First we create a hostPath in our minikube node, it will be the PV:
+
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+```
+
+`kubectl get pv --show-labels`  
+`kubectl describe pv task-pv-volume`  
+
+## Create PVC (no labels)
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+```
+When we do not specify the PV we want to use K8s will get a PV that can satisfy the resource requests.
+
+## Create PVC (labels)
+
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume2
+  labels:
+    mysql: ready
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data2"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim2
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  selector: 
+    matchLabels: 
+      mysql: ready
+
+```
+
+## Adding PVC to POD
+
+pvc-pod.yaml
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv
+  labels:
+    mysql: ready
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/media"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  selector: 
+    matchLabels: 
+      mysql: ready
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "1234"
+          volumeMounts:
+            - mountPath: "/var/lib/mysql"
+              name: mysql-lib
+      volumes:
+        - name: mysql-lib
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+```
+
+## Storeage Class and Dynamic Provisioning
+
+sc-pvc.yaml
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sc-pvc
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+```
+
+If the PVC do not have a PV created before it will be created dinamically.
+

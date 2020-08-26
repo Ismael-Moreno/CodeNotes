@@ -30,6 +30,10 @@ This ip is internal for the cluster.
 
 `kubectl logs podtest`  
 
+## Edit whichever object
+
+`kubetcl edit pod podtest`
+
 ## Create pods from manifest
 
 pod.yaml
