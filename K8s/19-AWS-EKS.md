@@ -137,4 +137,3 @@ spec:
 ```
 
 `kubectl logs -f -n kube-system <pod-name>`  
-
