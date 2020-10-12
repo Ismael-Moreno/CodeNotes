@@ -35,3 +35,80 @@ The subnet is always mapped to a single AZ and you will not be able to launch an
 
 # Internet Gateway definition
 Its a horizontally scaled, redundant and highly available VPC component that allows communication between instances in your VPC and the internet. It therefore imposes no availability risks or bandwith constraints on your network traffic.
+
+![vpc-gateway](./images/vpc-gateway.png)
+
+# Internet gateway requeriments
+1. An internet gateway must be attached to your VPC.
+2. All instances in your subnet must have either a public IP address or an Elastic IP address.
+3. Your subnet's route table must point to the internet gateway.
+4. All network access control and security groups rules must be configured to allow the required traffic to and from your instance.
+
+# Route table definition
+A route table contains a set of rules, called routes, which are used to determine where the network traffic is directed. A subnet must be asociated with one and one only route table.
+
+Each VPC has a default route table and its a good practice to leave this in its original state and create a new route table to customize de network traffic routes associated with your VPC.
+
+![vpc-routes](./images/vpc-routes.png)
+
+# NAT device
+Enable instances in a private subnet to connect to the internet or AWS resources but prevent the internet from initiating connections with the instances in the private subnet. When traffic goes to the internet the source IP address of your instance is replaces with the NAT device addess and when the internet traffic comes back again the NAT device translates the address to your instances private IP address.
+![vpc-nat-devices](./images/vpc-nat-device.png)
+
+Aws provides two kind of NAT devices:
+- NAT gateway: AWS recommended, it is a managed service that provides better availability and bandwith than NAT instances. Each NAT gateway is create in a specific availability zone and its implemented with redundancy in that zone. It must be launched in a public subnet because it needs internet conectivity, it needs an Elastic IP address. Once created you need to update the root table associated with your private subnet to point internet bound traffic to the NAT gateway. 
+- NAT instance: It is launched from a NAT AMI running as an instance in your VPC.
+
+# Security groups
+A security group acts as a virtual firewall that controls the traffic for one or more instances. You add rules to each security group that allow traffic to or from its associated instances.
+![vpc-security-groups](./images/vpc-security.png)
+
+Examples:
+- Security group for Web Server. Allow http and https ports from internet. All other traffic denied.
+- Security group for Database. Allow MSSQL database connection port from internet, allow RDP from internal subnet, deny all other traffic.
+
+# Security groups rules
+- By default, security groups allow all outbound traffic.
+- Security group rules are always permissive, that means you can't create a rule to deny access. That means you are allowing access rathen than denying it.
+- Security groups are stateful. If you send a request from your instance the response traffic to that request is allowed to flow in regardless of the inbound security group rules.
+- You can modify the rules of a security group at anytime and rules are applied inmidiately.
+
+# Network ACL definition
+A network access control list (ACL) is an optional layer of security for your VPC that acts as a firewall for controlling traffic in and out of one or more subnets. You might set up network ACLs with rules similar to your security groups in order to add an additional layer of security to your VPC.
+
+![vpc-acl](./images/vpc-acl.png)
+
+A network ACL sits in between a root table and a subnet. The default network ACL is configured to allow all traffic to flow in and out of the subnets to which it is associated. Each NACL includes a rule whose rule number is an asterisk. This rule ensures that if a packet doesn't match any of the other numbered rules is denied. You cant modify or remove this rule.
+
+![vpc-acl-rule](./images/vpc-acl-rule.png)
+
+# Network ACL rules
+- Each subnet in your VPC must be associated with an ACL.
+- A subnet can only be associated with one ACL. However, an ACL can be associated with multiple subnets.
+- An ACL contains a list of numbered rules with are evaluated in order, starting with the lowest. As soon as a rule match its traffic it is applied regardless of any higher numbered rules that may contradict it.
+- ACLs are stateless; responses to allowed inbound traffic are subject to the rules for outbound traffic.
+
+# AWS best practices and costs
+- Always use public and private subnets, you should use private subnets to secure resources that don't need to be available from the internet.
+- To provide secure internet access to the instances that reside in your private subnets you should provide a NAT device.
+- Choose your CIDR blocks carefully. Amazon VPC can contain from 16 to 65,536 IP addresses so you should chose your CIDR according to how many instances you will need.
+- Create separate VPC for development, staging, test and production o create one VPC with separate subnets.
+- You should use security groups and NACLs to secure the traffic coming in and out of your VPC. Amazon advises to use security groups for whitelisting traffic and NACLs to the blacklisting traffic
+- Tiering security groups: You should create different security groups for different tiers of your infraestructure architecture inside VPC
+- You should standarize your security group naming conventions. Following a security group naming convention allows Amazon VPC operation and management for large scale deployments to become much easier.
+- Span VPC across multiple subnets in multiple AZs inside a region, this helps in architecting HA inside your VPC.
+
+AWS has various limitations on the VPC components:
+- 5 VPCs per region
+- 200 subnets per VPC
+- 200 route tables per VPC
+- 500 security groups per VPC
+- 50 inbound or outbound rules per VPC
+> Some rules can be increased by raising a ticker with AWS support
+
+AWS VPC costs:
+- If you chose to create a hardware VPN connection to your VPC using Virtual Private Gateway you are charged for each VPN connection hour that your VPN connection is provisioned and available.
+- Each partial VPN connection hour consumed is billed as full hour.
+- You will also incur into AWS data transfer charges for all data transferred via the VPN connection.
+- If you chose to create a NAT gateway in your VPC you are charged for each NAT gateway hour that your NAT gateway is provisioned and available. Data processing charges apply for each GB processed through that NAT gateway.
+- Each partial NAT gateway hour consumed is billed as full hour.
