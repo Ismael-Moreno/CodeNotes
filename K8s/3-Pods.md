@@ -109,4 +109,4 @@ spec:
 
 `kubectl get pods -l app=backend`  
 `kubectl get pods -l app=front`  
-`kubectl get pods -l env=dev`
+`kubectl get pods -l env=dev`  
