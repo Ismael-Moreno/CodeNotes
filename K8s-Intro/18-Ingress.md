@@ -87,7 +87,7 @@ spec:
 
 Then we can access the app using IP:nodeport/appv1
 
-### Appy rules by host and path:
+### Apply rules by host and path:
 
 ingress-rules.host.yaml
 ```
