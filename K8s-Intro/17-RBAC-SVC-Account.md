@@ -7,6 +7,8 @@ When you (a human) access the cluster (for example, using kubectl), you are auth
 `kubectl describe sa default`  
 
 ## Create SA
+`kubectl create serviceaccount dashboard-sa`  
+
 
 sa.yaml
 ```

@@ -162,3 +162,22 @@ spec:
            name: config-vars
            key: db_user
 ```
+
+## Load full configmap
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: webapp-color
+  name: webapp-color
+  namespace: default
+spec:
+  containers:
+  - envFrom:
+    - configMapRef:
+        name: webapp-config-map
+    image: kodekloud/webapp-color
+    name: webapp-color
+```
+

@@ -67,7 +67,7 @@ rules:
   - apiGroups: [""] # "" indicates the core API group
     resources: ["pods"]
     verbs: ["get", "watch", "list"]
-
+    resourceNames: ["blue", "red"]
 ```
 
 `kubectl get roles`  
@@ -85,7 +85,7 @@ metadata:
   namespace: default
 subjects:
   - kind: User
-    name: ismael # "name" is case sensitive
+    name: ismael
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role #this must be Role or ClusterRole
@@ -115,7 +115,7 @@ metadata:
   name: cluster-read-pods
 subjects:
   - kind: User
-    name: ismael # "name" is case sensitive
+    name: ismael
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole #this must be Role or ClusterRole
@@ -132,7 +132,7 @@ kind: ClusterRole
 metadata:
   name: svc-cluster-group
 rules:
-  - apiGroups: [""] # "" indicates the core API group
+  - apiGroups: [""]
     resources: ["services"]
     verbs: ["*"]
 ---
@@ -142,7 +142,7 @@ metadata:
   name: svc-cluster-group
 subjects:
   - kind: Group
-    name: dev # "name" is case sensitive
+    name: dev
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole #this must be Role or ClusterRole

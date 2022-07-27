@@ -130,3 +130,8 @@ spec:
               key: password
 ```
 
+```
+envFrom:
+  - secretRef:
+      name: mysecret
+```

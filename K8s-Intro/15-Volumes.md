@@ -76,6 +76,12 @@ spec:
 `kubectl get pv --show-labels`  
 `kubectl describe pv task-pv-volume`  
 
+Access modes are:
+- ReadOnlyMany: the volume can be mounted as read-only by many nodes.
+- ReadWriteOnce: the volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple pods to access the volume when the pods are running on the same node.
+- ReadWriteMany: the volume can be mounted as read-write by many nodes.
+- ReadWriteOncePod: the volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to ensure that only one pod across whole cluster can read that PVC or write to it. This is only supported for CSI volumes and Kubernetes version 1.22+.
+
 ## Create PVC (no labels)
 
 ```
@@ -92,6 +98,23 @@ spec:
       storage: 3Gi
 ```
 When we do not specify the PV we want to use K8s will get a PV that can satisfy the resource requests.
+
+## AWS EBS volume
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vol1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  persistentVolumeReclaimPolicy: Retain
+  awsElasticBlockStore:
+    volumeID: <volume-id>
+    fsType: ext4
+```
 
 ## Create PVC (labels)
 
@@ -193,7 +216,7 @@ spec:
             claimName: mysql-pv-claim
 ```
 
-## Storeage Class and Dynamic Provisioning
+## Storage Class and Dynamic Provisioning
 
 sc-pvc.yaml
 ```
@@ -210,5 +233,43 @@ spec:
       storage: 3Gi
 ```
 
-If the PVC do not have a PV created before it will be created dinamically.
+> If the PVC do not have a PV created before it will be created dinamically.
 
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: google-storage
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+  replication-type: none
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  storageClassName: google-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-sc
+spec:
+  containers:
+    - image: nginx:alpine
+      name: test-container
+      volumeMounts:
+        - mountPath: /opt
+          name: data-volume
+  volumes:
+    - name: data-volume
+      persistentVolumeClaim:
+        claimName: myclaim
+```
