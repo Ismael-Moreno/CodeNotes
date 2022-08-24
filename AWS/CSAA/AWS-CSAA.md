@@ -240,3 +240,164 @@ Aurora provides a writer Endpoint pointing to the master. Also provides a reader
 - Encryption in flight using SSL
 - Possibility to authenticate using IAM token
 
+## Aurora Advanced Concepts
+- Replica autoscaling
+- Custom endpoints. Define a subset of aurora instances as custom endpoints to use the ones we consider more powerful for example.
+- Serverless. Automated database instantiation and autoscaling based on actual usage. Good for infreqquest, intermittent or unpredictable workloads. No capacity planning needed. Pay per second, can be more cost-effective.
+- Multi-Master. In case you want inmediate failover for write node (HA). Every node does R/W - vs promoting a RR as the new master.
+- Global. 1 primary region R/W and up to 5 RO regions, up to 16 replicas per scondary region, promoting another region has an RTO of < 1 min.
+- Machine Learning. Enables you to add ML-based predictions to your applications via SQL. Simple, optimized and secure integration between Aurora and AWS ML services. Supported services: Amazon SageMaker, Amazon Comprehend.
+
+# ElastiCache
+- The same way RDS is to get managed Relational Databases.
+- ElastiCache is to get managed Redis or Memcached.
+- Caches are in-memory databases with really high performance, low latency.
+- Helps reduce load off of databases for read intensice workloads.
+- Helps make your application stateless.
+- AWS takes care of OS maintenance / patching, optimizations, setup, configuration, monitoring, failure recovery and backups.
+- Using ElastiCache involves heavy application code changes.
+
+## ElastiCache Architecture
+### DB Cache
+- Applications queries ElastiCache, if not available, get from RDS and store in ElastiCache.
+- Help relieve load in RDS.
+- Cache must have an invalidation strategy to make sure only the most current data is used in there.
+### User Session Store
+- Users logs into any of the application.
+- The application writes the session data into ElastiCache.
+- The user hits another instance of our application.
+- The instance retrieves the data and the user is already logged in.
+
+## Redis vs Memcached
+Redis:
+- Multi AZ with auto-failover
+- Read replicas to scale reads and have HA
+- Data durability using AOF persistence.
+- Backup and restore features.
+Memcached:
+- Multi-node for partitioning of data (sharding)
+- No HA (replication)
+- Non persistent
+- No backup and restore
+- Multi-threaded architecture
+
+## Advanced Elasticache
+- All caches in ElastiCache:
+  - Do not support IAM authentication
+  - IAM policies on ElastiCache aare only used for AWS API-leve security
+- Redis AUTH:
+  - You can set a "password/token" when you create a Redis cluster
+  - This is an extra level of security for your cache (on top of security groups)
+  - Support SSL in flight encryption
+- Memcached:
+  - Support SASL-based athentication (advanced)
+
+Patterns for ElastiCache:
+- Lazy Loading: all the read data us cached, data can become stale in cache
+- Write Through: adds or update data inteh cache when written to a DB (no stale data)
+- Session Store: store temporary session data in a cache (using TTL features)
+
+Redis Use Case:
+- Gaming Leaderboards are computationally complex
+- Redis sorted sets guarantee both uniqueness and element ordering
+- Each time a new elment added, it is ranked in real time, then added in the correct order
+
+# Route 53
+- A highly available, scalable, fully managed and Authoritative DNS.
+- Route 53 is also a Domain Registrar
+- Ability to check the health of your resources
+- The only AWS service which provides 100% availability SLA
+
+## Route 53 Records
+- How you want to route your traffic for a domain
+- Each record contains:
+  - Domain/subdomain name
+  - Record type
+  - Value
+  - Routing Policy (how route 53 responds to queries)
+  - TTL
+- Supports the following DNS record types: A/AAAA/CNAME/NS/CAA/DS/MX/NAPTR/PTR/SOA/TXT/SPF/SRV  
+
+Route 53 Record types:
+- A: maps to a hostname or IPv4
+- AAAA: maps to a hostname or IPv6
+- CNAME: maps a hostname to another hostname
+  - The target is domain name which must have an A or AAAA record.
+  - Can't create CNAME record for the top node of a DNS namespace (Zone Apex).
+- NS: Name Servers for the Hosted Zone
+  - Control how traffic is routed for a domain.
+
+## Route 53 Hosted Zones
+- A container for records that define how to route traffic to a domain and its subdomains.
+- Public Hosted Zones: Contains records that specify how to route traffic on the internet (public domain names).
+- Private Hosted Zones: Contains records that specify how to route traffic within one or more VPCs (private domain names).
+- Pay 0.50 per month per hosted zone.
+
+## Route 53 Routing Policy
+Define how Route 53 responds to DNS queries. DNS does not route any traffic, it only responds to the DNS queries.
+### Simple
+- Typically route traffic to a single resource. 
+- Can specify multiple values in the same record. 
+- If multiple values returned a random one is chosen by the client.
+- When alias enabled, specify only one AWS resource.
+- Can't be associated with healthchecks.
+### Weighted
+- Control the % of requests that go to each specific resources.
+- Assign each record a relative weight. Weights do not need to sum up to 100.
+- DNS records must have the same name and type.
+- Can be associated with Health Checks.
+- Use cases: load balancing, testing new application versions, etc.
+- Assign a weight of 0 to a record to stop sending traffic to a resource.
+### Latency
+- Redirect to the resource that has the least latency close to us.
+- Super helpful when latency for users is a priority.
+- Latency is based on traffic between users and AWS Regions.
+- Can be associated with health checks (failover capability).
+### Failover
+Use when you want to configure active-passive failover. You can use failover routing to create records in a private hosted zone. Failover routing lets you route traffic to a resource when the resource is healthy or to a different resource when the first resource is unhealthy.
+### Geolocation
+- Different from latency based.
+- This routing is based on user location.
+- Specify location by continent, country or state (if there is overlapping, most precise location selected).
+- Should create a default record (in case there is no match location).
+- Can be associated with Health Checks.
+### Geoproximity
+- Route traffic to your resources based on the geographic location of users and resources.
+- Ability to shift more traffic resources based on the defined bias.
+- To change the size of the geographic region, specify bias values:
+  - To expand (1 to 99) - more traffic to the resource.
+  - To decerase (-1 to -99) - less traffic to the resource.
+- Resources can be:
+  - AWS resources (specify AWS region)
+  - Non-AWS resources (specify Latitude and Longitude)
+- You must use Route 53 Traffic Flow (advanced) for this feature.
+
+## Route 53 Traffic Flow
+- Simplify the proccess of creating and maintaining records in large and complex configurations.
+- Visual editor to manage complex routing decision trees.
+- COnfiguration can be saved as Traffic Flow Policy:
+  - Can be applied to different Route53 hosted zones (different domain names)
+  - Supports versioning
+
+
+## Route 53 Health Checks
+HTTP Health Checks are only for public resources. Health check => Automated DNS failover
+### Health checks that monitor and endpoint
+- About 15 global health checkers will check the endpoint health:
+  - healthy/unhealthy threshold
+  - interval
+  - supported protocols are HTTP, HTTPS, TCP
+  - if > 18% of health checkers reposrt the endpoint is healthy, Route53 considers it Healthy.
+  - Ability to choose which locations you want Route53 to use.
+- Health checks pass only when the endpoint responds with the 2xx and 3xx status codes.
+- Health checks can be setup to pass/fail based on the text in the first 5120 bytes of the response.
+- Configure your router/firewall to allow incoming requests from Route53 health checkers.
+
+### Health checks that monitor other health checks (Calculated Health Checks)
+- Combine the results of multiple health checks into a single health check.
+- You can use OR, AND, or NOT.
+- Can monitor up to 256 Child Health.
+- Specify how many of the health checks need to pass to make the parent class.
+### Health checks that monitor CloudWatch Alarms
+- Route 53 checkers are outside the VPC.
+- You can create a CloudWatch Metric and associate a CloudWatcn alarm, then create a Helth Check that checks the alarm itself.
